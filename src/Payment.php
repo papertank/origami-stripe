@@ -26,6 +26,11 @@ class Payment
         $this->paymentIntent = $paymentIntent;
     }
 
+    public static function find($id)
+    {
+        return new static(PaymentIntent::retrieve($id));
+    }
+
     /**
      * Get the total amount that will be paid.
      *
@@ -121,6 +126,11 @@ class Payment
     public function asPaymentIntent()
     {
         return $this->paymentIntent;
+    }
+
+    public function intent()
+    {
+        return $this->asPaymentIntent();
     }
 
     /**
