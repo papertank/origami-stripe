@@ -253,6 +253,17 @@ class Payment
     }
 
     /**
+     * Update the underlying Stripe PaymentIntent instance.
+     *
+     * @return Payment
+     */
+    public function updatePaymentIntent(array $params, $options = null)
+    {
+        $this->paymentIntent = PaymentIntent::update($this->paymentIntent->id, $params, $options);
+        return $this;
+    }
+
+    /**
      * Dynamically get values from the Stripe PaymentIntent.
      *
      * @param  string  $key
