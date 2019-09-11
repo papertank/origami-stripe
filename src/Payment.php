@@ -5,6 +5,8 @@ namespace Origami\Stripe;
 use Money\Money;
 use Money\Currency;
 use Stripe\PaymentIntent;
+use Origami\Stripe\Exceptions\PaymentFailure;
+use Origami\Stripe\Exceptions\PaymentActionRequired;
 
 class Payment
 {
@@ -26,15 +28,40 @@ class Payment
         $this->paymentIntent = $paymentIntent;
     }
 
+    /**
+     * Create a new Payment instance
+     *
+     * @return Payment
+     */
+    public static function create($params = null, $options = null)
+    {
+        return new static(PaymentIntent::create($params, $options));
+    }
+
+    /**
+     * Create a new Payment instance from a PaymentIntent id
+     *
+     * @return Payment
+     */
     public static function find($id)
     {
         return new static(PaymentIntent::retrieve($id));
     }
 
     /**
-     * Get the total amount that will be paid.
+     * The Stripe PaymentIntent id
      *
      * @return string
+     */
+    public function id()
+    {
+        return $this->paymentIntent->id;
+    }
+
+    /**
+     * Get the total amount that will be paid.
+     *
+     * @return Money
      */
     public function amount()
     {
@@ -62,13 +89,48 @@ class Payment
     }
 
     /**
+     * Determine if the payment has the given statuses
+     *
+     * @param array|string $status
+     * @return bool
+     */
+    public function hasStatus($status)
+    {
+        if (is_array($status)) {
+            return in_array($this->paymentIntent->status, $status);
+        }
+
+        return $this->paymentIntent->status == $status;
+    }
+
+    /**
+     * Determine if the payment needs to be confirmed.
+     *
+     * @return bool
+     */
+    public function requiresConfirmation()
+    {
+        return $this->hasStatus('requires_confirmation');
+    }
+
+    /**
      * Determine if the payment needs a valid payment method.
      *
      * @return bool
      */
     public function requiresPaymentMethod()
     {
-        return $this->paymentIntent->status === 'requires_payment_method';
+        return $this->hasStatus('requires_payment_method');
+    }
+
+    /**
+     * Determine if the payment requires capture
+     *
+     * @return bool
+     */
+    public function requiresCapture()
+    {
+        return $this->hasStatus('requires_capture');
     }
 
     /**
@@ -78,7 +140,7 @@ class Payment
      */
     public function requiresAction()
     {
-        return $this->paymentIntent->status === 'requires_action';
+        return $this->hasStatus('requires_action');
     }
 
     /**
@@ -88,7 +150,7 @@ class Payment
      */
     public function isCancelled()
     {
-        return $this->paymentIntent->status === 'canceled';
+        return $this->hasStatus('canceled');
     }
 
     /**
@@ -98,7 +160,17 @@ class Payment
      */
     public function isSucceeded()
     {
-        return $this->paymentIntent->status === 'succeeded';
+        return $this->hasStatus('succeeded');
+    }
+
+    /**
+     * Determine if the payment was successful.
+     *
+     * @return bool
+     */
+    public function isSuccessful()
+    {
+        return $this->isSucceeded();
     }
 
     /**
@@ -118,6 +190,48 @@ class Payment
         }
     }
 
+    public function confirm($params = null, $options = null)
+    {
+        $this->paymentIntent->confirm();
+
+        return $this;
+    }
+
+    public function capture(Money $amount = null, array $params = [], $options = null)
+    {
+        if (!$this->hasStatus('requires_capture')) {
+            throw PaymentFailure::unableToCapture($this);
+        }
+
+        if (!$amount) {
+            $amount = $this->amount();
+        }
+
+        $params = array_merge($params, [
+            'amount_to_capture' => $amount->getAmount()
+        ]);
+
+        $this->paymentIntent->capture($params);
+
+        return $this;
+    }
+
+    public function charges()
+    {
+        return $this->paymentIntent->charges->data ?? [];
+    }
+
+    public function getLastSuccessfulCharge()
+    {
+        foreach ($this->charges() as $charge) {
+            if ($charge->paid == true) {
+                return $charge;
+            }
+        }
+
+        return null;
+    }
+
     /**
      * The Stripe PaymentIntent instance.
      *
@@ -128,6 +242,11 @@ class Payment
         return $this->paymentIntent;
     }
 
+    /**
+     * The Stripe PaymentIntent instance.
+     *
+     * @return \Stripe\PaymentIntent
+     */
     public function intent()
     {
         return $this->asPaymentIntent();
