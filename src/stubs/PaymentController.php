@@ -2,29 +2,14 @@
 
 namespace App\Http\Controllers\Ajax;
 
-use Illuminate\Support\Str;
 use Origami\Stripe\Exceptions\PaymentFailed;
 use Origami\Stripe\Exceptions\PaymentActionRequired;
 use Origami\Stripe\Payment;
 use Stripe\Exception\ApiErrorException;
-use Stripe\PaymentIntent;
 
 class PaymentController extends Controller
 {
-    public function store(Request $request)
-    {
-        $this->validate($request, [
-            'payment_method' => ['required', 'in:stripe'],
-        ], [
-            'payment_method.required' => 'Please select a payment method',
-        ]);
-
-        $paymentMethod = $request->input('payment_method');
-
-        return $this->{'handle' . Str::studly($paymentMethod)};
-    }
-
-    protected function handleStripe(Request $request)
+    protected function store(Request $request)
     {
         $this->validate($request, [
             'payment_method_id' => ['required_without:payment_intent_id'],
@@ -32,22 +17,34 @@ class PaymentController extends Controller
         ]);
 
         try {
+            $payment = null;
+
             if ($id = $request->input('payment_intent_id')) {
                 $payment = Payment::find($id);
-                $payment->intent()->confirm();
-            } else {
-                $payment = new Payment(PaymentIntent::create([
-                    'payment_method' => $request->input('payment_method_id'),
-                    'amount' => $request->input('amount'),
+            } elseif ($method = $request->input('payment_method_id')) {
+                $amount = $request->input('amount');
+                $data = [
+                    'amount' => $amount,
                     'currency' => 'gbp',
+                    'payment_method' => $method,
+                    'capture_method' => 'manual',
+                    'payment_method_types' => ['card'],
                     'confirmation_method' => 'manual',
                     'confirm' => true,
-                ]));
+                ];
+                if ($request->input('save_card')) {
+                    $data['setup_future_usage'] = 'on_session';
+                }
+                $payment = Payment::create($data);
+            }
+
+            if (!$payment) {
+                throw new Exception('Error fetching Stripe payment');
             }
 
             $payment->validate();
 
-            return response()->json([
+            return response([
                 'payment_intent_id' => $payment->id,
                 'success' => true,
             ]);
