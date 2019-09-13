@@ -2,6 +2,8 @@
 
 This package is a helper for Laravel projects using Stripe's PaymentIntents API and manual confirmation SCA setup.
 
+It was inspired by the SCA updates and logic on the [Laravel Cashier](https://github.com/laravel/cashier) package.
+
 ## Installation
 
 Install this package through Composer.
