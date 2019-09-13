@@ -142,6 +142,12 @@ try {
         'error' => $e->getMessage(),
         'success' => false,
     ], 500);
+} catch (Stripe\Exception\CardException $e) {
+    // Don't forget to handle Stripe's exceptions for declined cards, etc.
+    return response()->json([
+        'error' => $e->getMessage(),
+        'success' => false,
+    ], 500);
 } catch (Exception $e) {
     // Something else went wrong.
     Log::error($e);

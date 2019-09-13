@@ -6,6 +6,7 @@ use Origami\Stripe\Exceptions\PaymentFailed;
 use Origami\Stripe\Exceptions\PaymentActionRequired;
 use Origami\Stripe\Payment;
 use Stripe\Exception\ApiErrorException;
+use Stripe\Exception\CardException;
 
 class PaymentController extends Controller
 {
@@ -55,6 +56,11 @@ class PaymentController extends Controller
                 'success' => false,
             ], 200);
         } catch (PaymentFailed $e) {
+            return response()->json([
+                'error' => $e->getMessage(),
+                'success' => false,
+            ], 500);
+        } catch (CardException $e) {
             return response()->json([
                 'error' => $e->getMessage(),
                 'success' => false,
