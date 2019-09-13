@@ -105,14 +105,14 @@ See [https://stripe.com/docs/payments/payment-intents/web-manual#creating-with-m
 try {
     
     $payment = Origami\Stripe\Payment::create([
-    'amount' => 1000,
-    'currency' => 'gbp',
-    'payment_method' => $method,
-    'capture_method' => 'manual',
-    'payment_method_types' => ['card'],
-    'confirmation_method' => 'manual',
-    'confirm' => true,
-]));
+        'amount' => 1000,
+        'currency' => 'gbp',
+        'payment_method' => $method,
+        'capture_method' => 'manual',
+        'payment_method_types' => ['card'],
+        'confirmation_method' => 'manual',
+        'confirm' => true,
+    ]));
 
     if (!$payment) {
         throw new Exception('Error fetching Stripe payment');
