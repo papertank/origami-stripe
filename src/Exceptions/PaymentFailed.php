@@ -4,10 +4,10 @@ namespace Origami\Stripe\Exceptions;
 
 use Origami\Stripe\Payment;
 
-class PaymentFailure extends IncompletePayment
+class PaymentFailed extends IncompletePayment
 {
     /**
-     * Create a new PaymentFailure instance.
+     * Create a new PaymentFailed instance.
      *
      * @param  \Origami\Stripe\Payment  $payment
      * @return self
@@ -21,7 +21,21 @@ class PaymentFailure extends IncompletePayment
     }
 
     /**
-     * Create a new PaymentFailure instance.
+     * Create a new PaymentFailed instance.
+     *
+     * @param  \Origami\Stripe\Payment  $payment
+     * @return self
+     */
+    public static function requiresConfirmation(Payment $payment)
+    {
+        return new self(
+            $payment,
+            'The payment attempt failed and requires additional confirmation to re-attempt.'
+        );
+    }
+
+    /**
+     * Create a new PaymentFailed instance.
      *
      * @param  \Origami\Stripe\Payment  $payment
      * @return self

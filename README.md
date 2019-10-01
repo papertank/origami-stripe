@@ -155,6 +155,12 @@ try {
 }
 ```
 
+## Changelog
+
+#### v1.1.0
+- Bugfix: Renamed PaymentFailure exception to PaymentFailed.
+- Added PaymentFailed::requiresConfirmation exception state.
+
 ## Author
 [Papertank Limited](http://papertank.com)
 

@@ -5,7 +5,7 @@ namespace Origami\Stripe;
 use Money\Money;
 use Money\Currency;
 use Stripe\PaymentIntent;
-use Origami\Stripe\Exceptions\PaymentFailure;
+use Origami\Stripe\Exceptions\PaymentFailed;
 use Origami\Stripe\Exceptions\PaymentActionRequired;
 
 class Payment
@@ -179,12 +179,12 @@ class Payment
      * @return void
      *
      * @throws \Origami\Stripe\Exceptions\PaymentActionRequired
-     * @throws \Origami\Stripe\Exceptions\PaymentFailure
+     * @throws \Origami\Stripe\Exceptions\PaymentFailed
      */
     public function validate()
     {
         if ($this->requiresPaymentMethod()) {
-            throw PaymentFailure::invalidPaymentMethod($this);
+            throw PaymentFailed::invalidPaymentMethod($this);
         } elseif ($this->requiresAction()) {
             throw PaymentActionRequired::incomplete($this);
         }
@@ -200,7 +200,7 @@ class Payment
     public function capture(Money $amount = null, array $params = [], $options = null)
     {
         if (!$this->hasStatus('requires_capture')) {
-            throw PaymentFailure::unableToCapture($this);
+            throw PaymentFailed::unableToCapture($this);
         }
 
         if (!$amount) {
