@@ -10,6 +10,7 @@
     ],
     "require": {
         "php": ">=5.6.0",
+        "illuminate/contracts": "~5.4|^6.0",
         "moneyphp/money": "^3.2",
         "stripe/stripe-php": "^7.0"
     },
@@ -20,7 +21,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-master": "1.0-dev"
+            "dev-master": "1.1-dev"
         }
     }
 }
