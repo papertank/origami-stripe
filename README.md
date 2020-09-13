@@ -14,7 +14,7 @@ composer require origami/stripe
 
 ### Requirements
 
-This package is designed to work with Laravel >= 5.8 projects currently.
+This package is designed to work with Laravel >= 6.0 projects currently.
 
 ### Setup
 
@@ -154,12 +154,6 @@ try {
     return response()->json(['error' => 'Unexpected error', 'success' => false], 500);
 }
 ```
-
-## Changelog
-
-#### v1.1.0
-- Bugfix: Renamed PaymentFailure exception to PaymentFailed.
-- Added PaymentFailed::requiresConfirmation exception state.
 
 ## Author
 [Papertank Limited](http://papertank.com)
