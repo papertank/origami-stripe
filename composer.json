@@ -18,10 +18,5 @@
         "psr-4": {
             "Origami\\Stripe\\": "src/"
         }
-    },
-    "extra": {
-        "branch-alias": {
-            "dev-master": "1.2-dev"
-        }
     }
 }
