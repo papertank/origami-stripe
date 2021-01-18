@@ -218,7 +218,7 @@ class Payment
 
     public function charges()
     {
-        return isset($this->paymentIntent->charges->data) ? $this->paymentIntent->charges->data : [];
+        return $this->paymentIntent->charges->data ?? [];
     }
 
     public function getLastSuccessfulCharge()
